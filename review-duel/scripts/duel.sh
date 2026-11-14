@@ -23,12 +23,26 @@ EOF
 
 die() { echo "duel.sh: $*" >&2; exit 2; }
 
-marker() {
+# turn_line FILE: prints line 1 if it is a turn line, else returns 1
+turn_line() {
   local line
-  [[ -f $1 ]] || die "no review file: $1"
-  line=$(head -n 1 "$1")
-  [[ $line == '<!-- review-duel '*' -->' ]] || die "line 1 of $1 is not a review-duel turn line"
+  [[ -f $1 ]] || return 1
+  line=$(head -n 1 "$1") || return 1
+  [[ $line == '<!-- review-duel '*' -->' ]] || return 1
   printf '%s\n' "$line"
+}
+
+marker() {
+  [[ -f $1 ]] || die "no review file: $1"
+  turn_line "$1" || die "line 1 of $1 is not a review-duel turn line"
+}
+
+# read_line FILE SECONDS: the turn line, read up to three times SECONDS apart, because
+# the other side's editor may be rewriting the file at that instant
+read_line() {
+  local try
+  for try in 1 2; do turn_line "$1" && return; sleep "$2"; done
+  marker "$1"
 }
 
 # field LINE KEY: the value of KEY=value in the turn line
@@ -58,7 +72,7 @@ cmd_wait() {
   done
 
   local line interval timeout start now idle turn state round
-  line=$(marker "$file")
+  line=$(read_line "$file" 1)
   interval=$(field "$line" interval); interval=${interval:-5}
   timeout=$(field "$line" timeout); timeout=${timeout:-1800}
   is_uint "$interval" && ((interval >= 1)) || die "interval must be a whole number of seconds, at least 1"
@@ -66,7 +80,7 @@ cmd_wait() {
   start=$(date +%s)
 
   while :; do
-    line=$(marker "$file")
+    line=$(read_line "$file" "$interval")
     turn=$(field "$line" turn)
     state=$(field "$line" state)
     round=$(field "$line" round)

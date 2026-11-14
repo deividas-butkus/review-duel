@@ -44,6 +44,37 @@ out=$("$duel" wait "$f" reviewer 2>&1); check "reviewer sees the duel over" 3 $?
 out=$("$duel" pass "$f" reviewer 2>&1); check "no pass after closing" 2 $? "$out" "already closed"
 grep -q '^## Outcome' "$f"; check "body kept after passes" 0 $? ""
 
+# An editor rewriting the file can leave line 1 empty for a moment: wait reads it again.
+fresh
+"$duel" pass "$f" reviewer >/dev/null
+cp "$f" "$dir/saved.md"
+("$duel" wait "$f" author >"$dir/bg.out" 2>&1; echo $? >"$dir/bg.code") &
+sleep 1
+: >"$f"
+sleep 1.5
+cp "$dir/saved.md" "$f"
+"$duel" pass "$f" author >/dev/null
+wait
+check "wait retries a briefly unreadable turn line" 0 "$(cat "$dir/bg.code")" "$(cat "$dir/bg.out")" "YOUR TURN"
+
+# The same when wait starts while line 1 is empty (its first read). A fresh file is the
+# author's turn.
+fresh
+cp "$f" "$dir/saved.md"
+: >"$f"
+(sleep 0.5; cp "$dir/saved.md" "$f") &
+out=$("$duel" wait "$f" author 2>&1); check "wait's first read retries too" 0 $? "$out" "YOUR TURN"
+wait
+
+# A turn line that stays unreadable is still an error.
+fresh
+"$duel" pass "$f" reviewer >/dev/null
+("$duel" wait "$f" author >"$dir/bg.out" 2>&1; echo $? >"$dir/bg.code") &
+sleep 1
+printf 'no turn line\n' >"$f"
+wait
+check "wait gives up when the turn line stays unreadable" 2 "$(cat "$dir/bg.code")" "$(cat "$dir/bg.out")" "not a review-duel turn line"
+
 fresh 2
 touch -t 202001010000 "$f"
 out=$("$duel" wait "$f" reviewer 2>&1); check "timeout when the file is idle" 20 $? "$out" "TIMED OUT"
