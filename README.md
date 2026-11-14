@@ -32,8 +32,8 @@ symlinked skill folders. Edits take effect in new sessions of either tool. Curso
 agent needs no install as reviewer: the launch prompt gives it the `SKILL.md` path.
 
 The skill is tested in Claude Code and Codex, and with Cursor's agent as reviewer.
-Other agents that read the Agent Skills format, such as Gemini CLI, GitHub Copilot and Cursor, can load it from their own skill
-folders; see each tool's documentation.
+Other agents that read the Agent Skills format, such as Gemini CLI, GitHub Copilot and
+Cursor, can load it from their own skill folders; see each tool's documentation.
 
 Then ask the session that wrote the code for a review duel.
 
@@ -92,6 +92,9 @@ evidence, then the author's answers and fixes.
 
 Not tested yet: JetBrains IDEs and other terminals, Linux, Windows. The Terminal.app
 launch needs macOS; the printed command for a terminal tab needs only Bash.
+
+Other agent CLIs can review too: the author starts them with the prompt in
+`review-duel/references/setup.md`. `AGENTS.md` says how to add one to the launcher.
 
 ## Tests
 

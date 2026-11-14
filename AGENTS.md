@@ -25,3 +25,19 @@ README says how it is installed.
   cases must pass.
 - Ask before anything that spends vendor credits, such as launching a reviewer to test
   the skill.
+
+## Adding a reviewer CLI
+
+The launcher knows Codex, Claude Code and Cursor's agent. Any other agent CLI can review
+already: the author starts it with the prompt in `review-duel/references/setup.md`. To
+add one to the launcher:
+
+1. From its `--help` and current official documentation, find how to pass a prompt at
+   start, pick a model and effort, set the working folder, limit writes to the review
+   folder, and allow web search. Record the version and the date checked.
+2. Add a `case` branch to `review-duel/scripts/launch_reviewer.sh`.
+3. In `review-duel/references/launch.md`, add its column to the table, how read-only is
+   enforced, and its first-run prompts.
+4. Add a test with a stub of the CLI on PATH, and run `tests/test_duel.sh`.
+5. Ask before a test duel, since it spends credits. Then add the CLI to the README's
+   "Tested with".
