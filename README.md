@@ -87,9 +87,11 @@ evidence, then the author's answers and fixes.
 - Reviewer: Codex CLI 0.167.0 in a Terminal.app window; Claude Code 2.1.325 and
   Cursor's agent 2026.11.13 (grok-4.7-medium) in VS Code terminal tabs, started with the
   printed command.
+- Review file: opened with `duel.sh open` in VS Code 1.145, which reloaded it as both
+  sides wrote.
 
-Not tested yet: JetBrains IDEs and other terminals, Linux, Windows. The Terminal.app launch needs macOS; the printed command for
-a terminal tab needs only Bash.
+Not tested yet: JetBrains IDEs and other terminals, Linux, Windows. The Terminal.app
+launch needs macOS; the printed command for a terminal tab needs only Bash.
 
 ## Tests
 
