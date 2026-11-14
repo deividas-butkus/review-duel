@@ -70,11 +70,15 @@ verified.
 ```
 
 Line 1 says whose turn it is. The status line below the title tells the user who is
-working, on which model, and since when; during that duel it read
-`🔵 **Reviewer working** · Codex CLI 0.167.0, gpt-6-astra, high · round 2 · since 16:16`,
-and the working side adds what it is doing with `duel.sh note`. Below the table, each
-round adds a signed section: the reviewer's findings with evidence, then the author's
-answers and fixes.
+working, on which model, since when, and, through `duel.sh note`, on what. During that
+duel it read, in turn:
+
+- 🔵 **Reviewer working** · Codex CLI 0.167.0, gpt-6-astra, high · round 1 · since 16:10
+- 🟣 **Author working** · Claude Code 2.1.325, claude-opus-5-5, xhigh · round 1 · since 16:12 · reproducing F1 and F2
+- 🟣 **Author closing** · Claude Code 2.1.325, claude-opus-5-5, xhigh · round 3 · since 16:20
+
+Below the table, each round adds a signed section: the reviewer's findings with
+evidence, then the author's answers and fixes.
 
 ## Tested with
 
