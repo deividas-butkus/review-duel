@@ -113,6 +113,25 @@ left=$(grep -xF -f <(printf '%s\n' "${session_vars[@]}") <<<"$names")
 [[ -z $left ]]; check "start script drops Claude Code's session variables" 0 $? "left: $left"
 grep -qx CLAUDE_CODE_USE_BEDROCK <<<"$names"
 check "start script keeps Claude variables the user set" 0 $? ""
+check "codex starts without computer use and the browser" 0 0 "$out" \
+  "--disable computer_use --disable browser_use"
+
+# A TMPDIR without a trailing slash still puts the start script inside it.
+mkdir -p "$dir/tmp2"
+PATH="$dir/bin:$PATH" TMPDIR="$dir/tmp2" "$launcher" --cli codex --repo "$dir/repo" \
+  --review-file "$dir/rv/review.md" --terminal print >/dev/null 2>&1
+compgen -G "$dir/tmp2/review-duel-start.*" >/dev/null
+check "start script lands in a TMPDIR without a trailing slash" 0 $? "$(ls "$dir")"
+
+# When osascript fails (for example macOS denied control of Terminal), the launcher
+# says how to fix it. Stubs stand in for osascript and for uname, so this runs anywhere.
+mkdir -p "$dir/macbin"
+printf '#!/usr/bin/env bash\necho "execution error: Not authorized to send Apple events to Terminal. (-1743)" >&2\nexit 1\n' >"$dir/macbin/osascript"
+printf '#!/usr/bin/env bash\necho Darwin\n' >"$dir/macbin/uname"
+chmod +x "$dir/macbin/osascript" "$dir/macbin/uname"
+out=$(PATH="$dir/macbin:$dir/bin:$PATH" TMPDIR="$dir/tmp2" "$launcher" --cli codex \
+  --repo "$dir/repo" --review-file "$dir/rv/review.md" 2>&1)
+check "osascript failure prints how to fix it" 1 $? "$out" "Privacy & Security > Automation"
 
 echo
 ((fails == 0)) && echo "ALL PASS" || { echo "$fails FAILED"; exit 1; }

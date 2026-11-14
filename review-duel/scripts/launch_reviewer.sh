@@ -46,8 +46,12 @@ case $cli in
   codex)
     # Working root = the review folder: workspace-write lets Codex write there and
     # nowhere in the repository (tested with `codex sandbox`, codex-cli 0.167.0).
+    # A reviewer needs neither computer use nor the browser, and computer use asks to
+    # control an app (flags checked with `codex features list`, codex-cli 0.167.0,
+    # 2026-11-14).
     workdir=$review_dir
-    cmd=(codex -C "$review_dir" -s workspace-write --search)
+    cmd=(codex -C "$review_dir" -s workspace-write --search
+      --disable computer_use --disable browser_use)
     [[ -n $model ]] && cmd+=(-m "$model")
     [[ -n $effort ]] && cmd+=(-c "model_reasoning_effort=\"$effort\"")
     cmd+=("\$review-duel reviewer $file")
@@ -76,7 +80,8 @@ case $cli in
   *) die "unknown CLI: $cli. Start it yourself with the prompt in references/setup.md." ;;
 esac
 
-start=$(mktemp "${TMPDIR:-/tmp/}review-duel-start.XXXXXX")
+tmp=${TMPDIR:-/tmp}
+start=$(mktemp "${tmp%/}/review-duel-start.XXXXXX")
 {
   echo '#!/usr/bin/env bash'
   echo '# review-duel reviewer, written by launch_reviewer.sh'
@@ -100,8 +105,18 @@ printf '\n(run from %s)\n' "$workdir"
 if [[ $terminal == app ]]; then
   [[ $(uname) == Darwin ]] || die "Terminal.app needs macOS. Use --terminal print."
   case $start in *[\"\'\\]*) die "start script path has quotes or backslashes: $start" ;; esac
-  osascript -e "tell application \"Terminal\" to do script \"bash '$start'\"" \
-    -e 'tell application "Terminal" to activate' >/dev/null
+  if ! osascript -e "tell application \"Terminal\" to do script \"bash '$start'\"" \
+    -e 'tell application "Terminal" to activate' >/dev/null; then
+    cat >&2 <<EOF
+launch_reviewer.sh: could not open a Terminal.app window.
+- If macOS asked whether this app may control "Terminal", allow it and run the
+  launcher again. Unanswered for about 2 minutes, the request times out (-1712).
+- If it was denied, turn it on in System Settings > Privacy & Security > Automation.
+- Or use --terminal print, or paste this into a new terminal tab:
+  bash $(printf '%q' "$start")
+EOF
+    exit 1
+  fi
   echo "Started in a new Terminal.app window."
 else
   echo "Paste into a new terminal tab:"
