@@ -39,25 +39,42 @@ Then ask the session that wrote the code for a review duel.
 
 ## What a duel looks like
 
-The top of a finished review file, from the duel that reviewed a change to this
-repository's launcher (Claude Code as author, Codex as reviewer):
+The top of a finished review file, from the duel that reviewed the status line
+(Claude Code as author, Codex as reviewer):
 
 ```markdown
-<!-- review-duel turn=none round=2 state=closed interval=5 timeout=1800 cap=10 -->
-# Review duel: launcher start script clears Claude Code's session variables
+<!-- review-duel turn=none round=3 state=closed interval=5 timeout=1800 cap=10 -->
+# Review duel: status line, duel.sh note and open
 
-**State:** consensus in round 2 of at most 10.
+✅ **Closed** · consensus in round 3 · 2 findings: 2 closed · at 16:20
+
+## Outcome
+
+**State:** consensus in round 3, closed 2026-11-14 16:20. Two findings, both fixed and
+verified.
+
+- **What changed:** the status line matcher requires a status emoji (F1); a note
+  replaces the last one whole, also during setup (F2); `pass` copies untouched lines
+  byte for byte again. Five regression tests. Fixes:
+  `git diff -- review-duel tests`; code as reviewed: `git diff --cached -- README.md review-duel tests`.
+- **For the user to decide:** none.
+- **Not checked:** VS Code reloading the open file while a duel writes, Cursor's IDE,
+  Linux and Windows. CRLF review files stay unsupported, as before this change.
+
+### Findings
 
 | ID | Severity | Where | Finding | Status | Resolution |
 |---|---|---|---|---|---|
-| F1 | Minor | `tests/test_duel.sh:72-76` | Test treats a shell-escaped start path as a literal filename; fails under a TMPDIR containing spaces | closed | Verified: printed command runs via `bash -c`, exit status is checked, spaced path and all ten variables are covered; 25 checks pass |
+| F1 | Important | `review-duel/scripts/duel.sh:61–70` | Status matcher accepts ordinary Markdown bullets/headings and overwrites them | closed | Verified emoji matcher and both lookalike regression tests |
+| F2 | Minor | `review-duel/scripts/duel.sh:257–265` | Timestamp matching can retain an old note | closed | Verified setup and active-turn note replacement, including embedded round/time text |
 ```
 
-Line 1 says whose turn it is. A status line below the title tells the user who is
-working, on which model, and on what, for example
-`🔵 **Reviewer working** · Cursor agent, grok-4.7-medium · round 2 · since 15:43 · running tests`.
-Below the table, each round adds a signed section: the reviewer's findings with
-evidence, then the author's answers and fixes.
+Line 1 says whose turn it is. The status line below the title tells the user who is
+working, on which model, and since when; during that duel it read
+`🔵 **Reviewer working** · Codex CLI 0.167.0, gpt-6-astra, high · round 2 · since 16:16`,
+and the working side adds what it is doing with `duel.sh note`. Below the table, each
+round adds a signed section: the reviewer's findings with evidence, then the author's
+answers and fixes.
 
 ## Tested with
 
