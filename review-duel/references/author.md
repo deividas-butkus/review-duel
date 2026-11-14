@@ -55,6 +55,7 @@ Rewrite the Outcome section:
 
 Then `duel.sh pass FILE none --state closed`.
 
-Report to the user in chat: the outcome in up to five lines, the review file path, and
-the first open item for them to decide, with the others named in one line. The fixes
-stay unstaged. Staging and committing are the user's call.
+Report to the user in chat: the outcome in up to five lines, the review file path, how
+to close the reviewer (`/quit` in Codex, `/exit` in Claude Code, `/quit` or `/exit` in
+Cursor's agent), and the first open item for them to decide, with the others named in
+one line. The fixes stay unstaged. Staging and committing are the user's call.

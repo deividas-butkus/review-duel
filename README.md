@@ -31,8 +31,8 @@ Claude Code reads `~/.claude/skills/`. Codex reads `~/.agents/skills/`. Both fol
 symlinked skill folders. Edits take effect in new sessions of either tool. Cursor's
 agent needs no install as reviewer: the launch prompt gives it the `SKILL.md` path.
 
-The skill is tested in Claude Code and Codex. Other agents that read the Agent Skills
-format, such as Gemini CLI, GitHub Copilot and Cursor, can load it from their own skill
+The skill is tested in Claude Code and Codex, and with Cursor's agent as reviewer.
+Other agents that read the Agent Skills format, such as Gemini CLI, GitHub Copilot and Cursor, can load it from their own skill
 folders; see each tool's documentation.
 
 Then ask the session that wrote the code for a review duel.
@@ -60,10 +60,11 @@ reviewer's findings with evidence, then the author's answers and fixes.
 
 - macOS 26.6, the system Bash 3.2.
 - Author: Claude Code 2.1.325 in VS Code 1.145's integrated terminal.
-- Reviewer: Codex CLI 0.167.0 in a Terminal.app window.
+- Reviewer: Codex CLI 0.167.0 in a Terminal.app window; Claude Code 2.1.325 and
+  Cursor's agent 2026.11.13 (grok-4.7-medium) in VS Code terminal tabs, started with the
+  printed command.
 
-Not tested yet: Claude Code or Cursor's agent as reviewer, JetBrains IDEs and other
-terminals, Linux, Windows. The Terminal.app launch needs macOS; the printed command for
+Not tested yet: JetBrains IDEs and other terminals, Linux, Windows. The Terminal.app launch needs macOS; the printed command for
 a terminal tab needs only Bash.
 
 ## Tests

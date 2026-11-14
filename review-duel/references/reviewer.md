@@ -5,6 +5,16 @@ folder. Don't edit, format, stage, commit, stash or check out anything in the
 repository. Running tests, linters and builds is fine. If one needs to write outside
 the review folder and the sandbox asks, tell the user why.
 
+Don't start an agent session: never run the start script the launcher printed, and run
+`codex`, `claude` or `cursor-agent` only for commands that print help, versions or
+settings. A session spends credits, and in a test its stubs may not cover the real CLI.
+
+Run each command on its own: `SKILL_DIR/scripts/duel.sh` by its absolute path, git from
+the repository, with no `cd … &&` before and no `; echo …` after. Every part of a
+compound command must be allowed in advance, so a wrapped command makes the user
+approve it each time. Read files with your file tools where you have them, not `cat` or
+`sed`.
+
 Start by running `SKILL_DIR/scripts/duel.sh wait FILE reviewer` as SKILL.md describes:
 the author may still be writing.
 

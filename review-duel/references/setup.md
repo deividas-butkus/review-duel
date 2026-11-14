@@ -38,6 +38,12 @@ short numbered list. Every question offers a default, so the user can accept the
 2. **Model and effort.** First option: "CLI defaults (Recommended)", the model and
    effort the CLI is configured with. Second: "Set model or effort", for the user to
    type, for example "gpt-x, high". Valid effort values per CLI are in `launch.md`.
+   If "Set model or effort" comes back without values, ask a follow-up listing the
+   CLI's choices: model aliases or names (`claude --help` names `opus`, `sonnet`,
+   `fable`; `cursor-agent models` lists Cursor's), valid efforts, and Other. Recommend
+   the CLI's default model, else the vendor's top model, and the default effort, else
+   `xhigh`. Never recommend a cheaper model to save cost; that is the user's call. For
+   Cursor's agent, check what the user's plan runs (`launch.md`).
 3. **Scope.** Build the options from the repository state:
    - *Uncommitted changes*: working tree and index against HEAD, all of it or some
      paths. The default when this session's work is uncommitted.
@@ -51,8 +57,9 @@ short numbered list. Every question offers a default, so the user can accept the
      `<repo>/reviews/`. Inside it, one folder per duel:
      `YYYY-MM-DD_<slug>/review.md`, so patch files sit beside it. The user may name
      another place.
-   - *Temporary*: `${TMPDIR:-/tmp/}review-duel/YYYY-MM-DD_HHMM_<slug>/review.md`. The
-     operating system may clear it later.
+   - *Temporary*: `review-duel/YYYY-MM-DD_HHMM_<slug>/review.md` in the temporary
+     folder, `$TMPDIR` or else `/tmp`, joined with one slash (on macOS `$TMPDIR` ends
+     with one). The operating system may clear it later.
 
 **Dialog 2: the go-ahead**
 
@@ -127,8 +134,10 @@ For a CLI the script doesn't know, give the user the review file path and this p
 to start it with: "Read SKILL_DIR/SKILL.md and act as the review-duel reviewer for
 FILE".
 
-Tell the user in two lines: where the reviewer runs, or the command to paste, and that
-they can watch it, type into it, or tell either side "stop".
+Tell the user where the reviewer runs, or the command to paste, and that they can
+watch it, type into it, or tell either side "stop". Then list the prompts the chosen
+CLI may show and how to answer each, one line per prompt, from "First run" in
+`launch.md`.
 
 ## 6. Pass the turn and wait for round 1
 
