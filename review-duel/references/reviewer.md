@@ -16,7 +16,9 @@ approve it each time. Read files with your file tools where you have them, not `
 `sed`.
 
 Start by running `SKILL_DIR/scripts/duel.sh wait FILE reviewer` as SKILL.md describes:
-the author may still be writing.
+the author may still be writing. In each turn, keep the status line current with
+`duel.sh note FILE reviewer "…"`: at the start ("reading the code", "checking the
+fixes"), then before running checks and before writing your section.
 
 ## Round 1
 

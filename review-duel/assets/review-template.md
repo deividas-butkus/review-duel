@@ -1,6 +1,8 @@
 <!-- review-duel turn=author round=1 state=active interval=5 timeout=1800 cap=10 -->
 # Review duel: {what is reviewed}
 
+⚪ **Setting up** · the author is writing Setup and Intent
+
 ## Outcome
 
 **State:** in progress, round 1 of at most {cap}.

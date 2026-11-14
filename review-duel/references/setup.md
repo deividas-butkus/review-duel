@@ -6,7 +6,7 @@ Copy this checklist and tick it off:
 - [ ] 1. Gather context
 - [ ] 2. Interview the user
 - [ ] 3. Set the baseline
-- [ ] 4. Write the review file
+- [ ] 4. Write the review file and open it
 - [ ] 5. Launch the reviewer
 - [ ] 6. Pass the turn and wait for round 1
 ```
@@ -103,11 +103,20 @@ staging. Staging a partly staged file erases the split the user made.
   `git init` with a first commit, or run the duel without a baseline, with fixes then
   described in the review file.
 
-## 4. Write the review file
+## 4. Write the review file and open it
 
 Copy `SKILL_DIR/assets/review-template.md` to the chosen path. Set the turn line
 values (interval, timeout in seconds, cap), and fill in the title, Setup and Intent.
 The turn line starts with `turn=author`, so the reviewer waits until setup is done.
+
+Write each side's line in Setup as agent, model and effort on one line, for example
+`- **Author:** Claude Code 2.1.325, claude-opus-5-5, xhigh`. `pass` copies that line
+into the status line. Put anything more on the next line.
+
+Then open the file for the user: `SKILL_DIR/scripts/duel.sh open FILE`. In VS Code's
+terminal it opens the file at the top, in the window you run in, where the status
+line and findings table stay in view while the file fills. Elsewhere it prints the path
+for the user to open.
 
 **Intent** is the author's main contribution. In up to 15 lines: what the code is for,
 the requirements and constraints, decisions already taken with the user and why, known
@@ -135,7 +144,9 @@ to start it with: "Read SKILL_DIR/SKILL.md and act as the review-duel reviewer f
 FILE".
 
 Tell the user where the reviewer runs, or the command to paste, and that they can
-watch it, type into it, or tell either side "stop". Then list the prompts the chosen
+watch it, type into it, or tell either side "stop". Say that the review file's status
+line shows who is working, and that typing in the file's tab stops the editor from
+reloading it. Then list the prompts the chosen
 CLI may show and how to answer each, one line per prompt, from "First run" in
 `launch.md`.
 

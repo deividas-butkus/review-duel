@@ -53,8 +53,11 @@ repository's launcher (Claude Code as author, Codex as reviewer):
 | F1 | Minor | `tests/test_duel.sh:72-76` | Test treats a shell-escaped start path as a literal filename; fails under a TMPDIR containing spaces | closed | Verified: printed command runs via `bash -c`, exit status is checked, spaced path and all ten variables are covered; 25 checks pass |
 ```
 
-Line 1 says whose turn it is. Below the table, each round adds a signed section: the
-reviewer's findings with evidence, then the author's answers and fixes.
+Line 1 says whose turn it is. A status line below the title tells the user who is
+working, on which model, and on what, for example
+`🔵 **Reviewer working** · Cursor agent, grok-4.7-medium · round 2 · since 15:43 · running tests`.
+Below the table, each round adds a signed section: the reviewer's findings with
+evidence, then the author's answers and fixes.
 
 ## Tested with
 
@@ -73,7 +76,8 @@ a terminal tab needs only Bash.
 tests/test_duel.sh
 ```
 
-It tests the turn script in a throwaway folder and makes no model calls.
+It tests the turn script and the launcher in a throwaway folder and makes no model
+calls.
 
 ## License
 

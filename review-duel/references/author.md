@@ -1,6 +1,8 @@
 # Author turns
 
-Each time `wait` returns 0, take one turn.
+Each time `wait` returns 0, take one turn. Keep the status line current with
+`duel.sh note FILE author "…"` (SKILL.md): at the start, for example "answering F1–F3",
+then before tests and before writing up.
 
 ## 1. Check the ground
 

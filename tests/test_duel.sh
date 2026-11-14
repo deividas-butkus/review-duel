@@ -90,6 +90,94 @@ chmod 640 "$f"; "$duel" pass "$f" reviewer >/dev/null
 check "pass keeps file permissions" 640 "$(stat -f %Lp "$f" 2>/dev/null || stat -c %a "$f")" ""
 [[ -z $(ls "$dir" | grep duel-tmp) ]]; check "no temporary file left" 0 $? ""
 
+# The status line below the title: pass and note keep it current.
+status() { "$duel" show "$f" | sed -n 's/^status=//p'; }
+sides() {
+  sed -i.bak -e 's/^- \*\*Author:\*\* .*/- **Author:** Claude Code, opus, xhigh/' \
+    -e 's/^- \*\*Reviewer:\*\* .*/- **Reviewer:** Cursor agent, grok-4.7-medium/' "$f"
+  rm -f "$f.bak"
+}
+fresh; sides
+check "a fresh file says the author is setting up" 0 0 "$(status)" "⚪ **Setting up**"
+out=$("$duel" note "$f" author "writing Intent · round 1 · since 12:34" 2>&1)
+"$duel" note "$f" author "writing Intent" >/dev/null
+[[ $(status) == '⚪ **Setting up** · writing Intent' ]]
+check "a note during setup replaces the last one whole" 0 $? "$(status)"
+out=$("$duel" note "$f" reviewer "reading" 2>&1); check "note from the side without the turn is refused" 2 $? "$out" "author's turn"
+"$duel" pass "$f" reviewer >/dev/null
+s=$(status)
+check "pass names the reviewer and its model" 0 0 "$s" "🔵 **Reviewer working** · Cursor agent, grok-4.7-medium · round 1 · since "
+[[ $s != *"writing Intent"* ]]; check "pass clears the last note" 0 $? "$s"
+"$duel" note "$f" reviewer "running tests" >/dev/null
+[[ $(status) =~ ' · since '[0-9]{2}:[0-9]{2}' · running tests'$ ]]; check "note goes after the time" 0 $? "$(status)"
+"$duel" note "$f" reviewer 'writing findings & a/b \ c' >/dev/null
+s=$(status)
+[[ $s == *' · writing findings & a/b \ c' && $s != *"running tests"* ]]
+check "a new note replaces the old one, text kept as is" 0 $? "$s"
+"$duel" note "$f" reviewer 'waiting for tests · round 9 · since 12:34' >/dev/null
+"$duel" note "$f" reviewer 'writing findings' >/dev/null
+s=$(status)
+[[ $s =~ ' · round 1 · since '[0-9]{2}:[0-9]{2}' · writing findings'$ && $s != *12:34* ]]
+check "a note with its own round and time is replaced whole" 0 $? "$s"
+"$duel" pass "$f" author --state closing >/dev/null
+check "closing pass names the author" 0 0 "$(status)" "🟣 **Author closing** · Claude Code, opus, xhigh · round 1"
+awk '{ print }
+  /^[|]---[|]---[|]---[|]---[|]---[|]---[|]$/ { print "| F1 | Minor | `a.sh:1` | x | closed | fixed |"; print "| F2 | Important | `b.sh:2` | y | user | split |" }
+  /^[|]---[|]---[|]---[|]$/ { print "| F2 | keep it | change it |" }' "$f" >"$f.new" && mv "$f.new" "$f"
+"$duel" pass "$f" none --state closed >/dev/null
+check "closed after consensus, findings counted once" 0 0 "$(status)" \
+  "✅ **Closed** · consensus in round 1 · 2 findings: 1 closed, 1 for the user · at "
+
+fresh; sed -i.bak '1s/cap=10/cap=1/' "$f"; rm -f "$f.bak"
+"$duel" pass "$f" reviewer >/dev/null; "$duel" pass "$f" author >/dev/null
+"$duel" pass "$f" none --state closed >/dev/null
+check "closed at the round cap" 0 0 "$(status)" "✅ **Closed** · round cap reached in round 1 · no findings"
+fresh; "$duel" pass "$f" reviewer >/dev/null; "$duel" pass "$f" none --state stopped >/dev/null
+check "stopped" 0 0 "$(status)" "🛑 **Stopped** · round 1 · at "
+
+# A review file from before the status line: pass changes line 1 and nothing else.
+fresh; grep -v 'Setting up' "$f" >"$f.new" && mv "$f.new" "$f"
+cp "$f" "$dir/before.md"
+"$duel" pass "$f" reviewer >/dev/null
+diff <(tail -n +2 "$dir/before.md") <(tail -n +2 "$f") >/dev/null
+check "a file without a status line keeps its body" 0 $? ""
+out=$("$duel" note "$f" reviewer "x" 2>&1); check "note needs a status line" 2 $? "$out" "no status line"
+
+# Lines that only look like a status line (a bold label without a status emoji) are left
+# alone, with or without a real status line below them.
+fresh; sed -i.bak '2s/.*/# **Waiting** queue refactor/' "$f"; rm -f "$f.bak"
+awk 'NR == 3 { print "- **Waiting** for checks" } { print }' "$f" >"$f.new" && mv "$f.new" "$f"
+"$duel" pass "$f" reviewer >/dev/null
+[[ $(sed -n 2,3p "$f") == $'# **Waiting** queue refactor\n- **Waiting** for checks' ]] &&
+  [[ $(status) == "🔵 **Reviewer working**"* ]]
+check "lookalike lines stay, the real status line changes" 0 $? "$(sed -n 2,5p "$f")"
+fresh; sed -i.bak '2s/.*/# **Waiting** queue refactor/' "$f"; rm -f "$f.bak"
+awk '/Setting up/ { print "- **Waiting** for checks"; next } { print }' "$f" >"$f.new" && mv "$f.new" "$f"
+cp "$f" "$dir/before.md"
+"$duel" pass "$f" reviewer >/dev/null
+diff <(tail -n +2 "$dir/before.md") <(tail -n +2 "$f") >/dev/null
+check "lookalike lines stay in a file without a status line" 0 $? "$(sed -n 2,4p "$f")"
+
+# Lines other than line 1 and the status line are copied byte for byte, down to a
+# missing final newline.
+fresh; printf 'last line' >>"$f"
+"$duel" pass "$f" reviewer >/dev/null
+[[ $(tail -c 9 "$f") == 'last line' && $(tail -c 1 "$f" | od -An -c | tr -d ' ') == e ]]
+check "pass keeps a missing final newline" 0 $? "$(tail -c 12 "$f" | od -c | head -1)"
+
+# open: only inside VS Code's terminal, with code -r. A stub code records its arguments.
+mkdir -p "$dir/codebin"
+printf '#!/usr/bin/env bash\nprintf "%%s\\n" "$@" >"%s/code.args"\n' "$dir" >"$dir/codebin/code"
+chmod +x "$dir/codebin/code"
+abs="$(cd "$dir" && pwd -P)/review.md"
+out=$(env -u CURSOR_TRACE_ID TERM_PROGRAM=vscode PATH="$dir/codebin:$PATH" "$duel" open "$f" 2>&1)
+check "open in VS Code's terminal" 0 $? "$(tr '\n' ' ' <"$dir/code.args" 2>/dev/null)" "-r -g $abs:1"
+rm -f "$dir/code.args"
+out=$(env -u TERM_PROGRAM PATH="$dir/codebin:$PATH" "$duel" open "$f" 2>&1)
+[[ ! -e $dir/code.args ]]; check "outside VS Code, open only prints the path" 0 $? "$out" "Open the review file"
+out=$(CURSOR_TRACE_ID=1 TERM_PROGRAM=vscode PATH="$dir/codebin:$PATH" "$duel" open "$f" 2>&1)
+[[ ! -e $dir/code.args ]]; check "in Cursor's terminal, open doesn't call code" 0 $? "$out" "Open the review file"
+
 # launch_reviewer.sh: the start script drops Claude Code's session variables. A stub
 # codex on PATH prints the names (not values) of the variables it was started with.
 # The temporary folder has a space, so the printed command's quoting is tested too.

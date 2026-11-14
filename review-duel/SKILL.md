@@ -96,6 +96,27 @@ How to wait:
 Any write to the review file restarts the other side's timeout, so on a long turn save
 your section as you go.
 
+## The status line
+
+Below the title, a status line tells the user who is working, on which model, since
+when, and on what:
+
+```
+🔵 **Reviewer working** · Cursor agent, grok-4.7-medium · round 2 · since 15:43 · running tests
+```
+
+`pass` rewrites it, taking each side's agent and model from its line in Setup, and
+writes the final line when the duel closes or stops. The side holding the turn adds
+what it is doing:
+
+```bash
+SKILL_DIR/scripts/duel.sh note FILE author|reviewer "running tests"
+```
+
+Note at the start of your turn and before each long step, such as tests or writing up:
+about three notes a turn, since each is a tool call. A new note replaces the last one,
+and the next pass clears it.
+
 If the user tells either side to stop: `duel.sh pass FILE none --state stopped`, after a
 one-line note in the file.
 
@@ -145,6 +166,6 @@ file, whose Setup links the earlier one.
 - `references/launch.md`: reviewer CLIs, flags, how read-only is enforced, first-run
   prompts.
 - `assets/review-template.md`: the review file template.
-- `scripts/duel.sh`: turn line (`show`, `pass`, `wait`).
+- `scripts/duel.sh`: turn and status lines (`show`, `wait`, `pass`, `note`, `open`).
 - `scripts/launch_reviewer.sh`: starts the reviewer in a Terminal.app window, or prints
   the command to paste.
